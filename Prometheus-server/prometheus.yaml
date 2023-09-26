@@ -1,0 +1,41 @@
+# my global config
+global:
+  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+           - localhost:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+   - "rules/host_hardware_alerts.yaml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+  # digital ocean service discovery
+  - job_name: "node"
+    digitalocean_sd_configs: 
+    - authorization:
+          credentials: "digital-ocean-api-token"
+      port: 9100
+      refresh_interval: 60s
+    relabel_configs:
+      # Only scrape targets that have a tag 'application-server' and 'webapp'.
+      - source_labels: [__meta_digitalocean_tags]
+        regex: ".*application-server.*webapp.*"
+        action: keep
+      # Adding new label named `identifier`
+      - source_labels: [__meta_digitalocean_droplet_name, __meta_digitalocean_private_ipv4]
+        separator: "@"
+        regex: "(.*)@(.*)"
+        replacement: "${1}@${2}"
+        target_label: identifier

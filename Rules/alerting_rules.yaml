@@ -2,18 +2,20 @@ groups:
   - name: host_hardware_rules
     interval: 10s
     rules:
+      # Alerting rule for available memory percentage
       - alert: HostOutOfMemory
-        expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+        expr: (instance:node_memory_MemAvailable:percent_used < 10) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
         for: 2m
         labels:
           severity: warning
-          catagory: memory
+          category: memory
         annotations:
           summary: Host out of memory (instance {{ $labels.instance }})
           description: "Node memory is filling up (< 10% left)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
       
+      # Alerting rule for filesystem space percentage
       - alert: HostOutOfDiskSpace
-        expr: ((node_filesystem_avail_bytes * 100) / node_filesystem_size_bytes < 10 and ON (instance, device, mountpoint) node_filesystem_readonly == 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+        expr: (instance:node_filesystem_avail_space:percent_used < 10 and ON (instance, device, mountpoint) node_filesystem_readonly == 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
         for: 2m
         labels:
           severity: warning
@@ -22,8 +24,9 @@ groups:
           summary: Host out of disk space (instance {{ $labels.instance }})
           description: "Disk is almost full (< 10% left)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
       
+      # Alerting rule for filesystem inodes percentage
       - alert: HostOutOfInodes
-        expr: (node_filesystem_files_free / node_filesystem_files * 100 < 10 and ON (instance, device, mountpoint) node_filesystem_readonly == 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+        expr: (instance:node_filesystem_inodes:percent_free < 10 and ON (instance, device, mountpoint) node_filesystem_readonly == 0) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
         for: 2m
         labels:
           severity: warning
@@ -32,8 +35,9 @@ groups:
           summary: Host out of inodes (instance {{ $labels.instance }})
           description: "Disk is almost running out of available inodes (< 10% left)\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"
 
+      # Alerting rule for CPU load
       - alert: HostHighCpuLoad
-        expr: (sum by (instance) (avg by (mode, instance) (rate(node_cpu_seconds_total{mode!="idle"}[2m]))) > 0.8) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
+        expr: (instance:node_cpu_load:avg_load > 0.8) * on(instance) group_left (nodename) node_uname_info{nodename=~".+"}
         for: 2m
         labels:
           severity: warning

@@ -1,0 +1,21 @@
+groups:
+  - name: host_hardware_rules
+    interval: 10s
+    rules:
+      # Existing alerting rules...
+
+      # Recording rule for available memory percentage
+      - record: instance:node_memory_MemAvailable:percent_used
+        expr: (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) * 100
+
+      # Recording rule for filesystem space percentage
+      - record: instance:node_filesystem_avail_space:percent_used
+        expr: (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100
+
+      # Recording rule for filesystem inodes percentage
+      - record: instance:node_filesystem_inodes:percent_free
+        expr: 100 - ((node_filesystem_files_free / node_filesystem_files) * 100)
+
+      # Recording rule for CPU load
+      - record: instance:node_cpu_load:avg_load
+        expr: sum by (instance) (avg by (mode, instance) (rate(node_cpu_seconds_total{mode!="idle"}[2m]))) / count by (instance) (avg by (mode, instance) (rate(node_cpu_seconds_total[2m])))

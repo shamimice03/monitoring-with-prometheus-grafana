@@ -30,6 +30,8 @@ tar xvf "/tmp/prometheus-2.46.0.linux-amd64.tar.gz" --strip-components=1 -C /tmp
 sudo mv -f /tmp/prometheus /usr/local/bin
 sudo mv -f /tmp/promtool /usr/local/bin
 sudo mv -f /tmp/prometheus.yml /etc/prometheus/
+sudo mv -f /tmp/consoles /etc/prometheus/
+sudo mv -f /tmp/console_libraries /etc/prometheus/
 
 # Define the service unit file path
 SERVICE_UNIT_FILE="/etc/systemd/system/prometheus.service"

@@ -1,2 +1,1 @@
-- ADD EC2 Service Discovery
-- Add preious repo
+### Details on: [Medium Blog](https://levelup.gitconnected.com/monitoring-using-prometheus-and-grafana-f2bc85810ebb)
